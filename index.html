@@ -422,6 +422,23 @@
                     return;
                 }
                 
+                // 創建新的自訂物品並加入到 items 陣列
+                const newCustomItem = {
+                    id: Date.now(),
+                    name: formData.customItemName,
+                    category: '自訂物品',
+                    status: 'borrowed',
+                    borrower: formData.borrower,
+                    department: formData.department,
+                    borrowDate: formData.borrowDate,
+                    extension: formData.extension,
+                    notes: formData.notes,
+                    isCountable: false,
+                    isCustom: true
+                };
+                
+                items.push(newCustomItem);
+                
                 const newRecord = {
                     id: Date.now(),
                     itemName: formData.customItemName,
@@ -439,6 +456,7 @@
 
                 borrowHistory.push(newRecord);
                 saveData();
+                renderItems();
                 renderHistory();
                 showDashboard();
                 alert('自訂物品借用登記成功！');
@@ -534,14 +552,21 @@
                 borrowHistory.push(returnRecord);
                 alert(`成功歸還 ${qty} 條${item.name}！`);
             } else {
-                // 單一物品歸還
+                // 單一物品歸還（包括自訂物品）
                 const itemIndex = items.findIndex(i => i.id === itemId);
-                items[itemIndex].status = 'available';
-                items[itemIndex].borrower = null;
-                items[itemIndex].borrowDate = null;
-                items[itemIndex].department = null;
-                items[itemIndex].extension = null;
-                items[itemIndex].notes = null;
+                
+                if (item.isCustom) {
+                    // 自訂物品歸還後從 items 陣列中移除
+                    items.splice(itemIndex, 1);
+                } else {
+                    // 系統物品歸還後設為可借用狀態
+                    items[itemIndex].status = 'available';
+                    items[itemIndex].borrower = null;
+                    items[itemIndex].borrowDate = null;
+                    items[itemIndex].department = null;
+                    items[itemIndex].extension = null;
+                    items[itemIndex].notes = null;
+                }
 
                 // 更新借用記錄
                 const recordIndex = borrowHistory.findIndex(record => 
