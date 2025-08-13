@@ -1,86 +1,56 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>設備借用系統</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+        .card { border: 1px solid #ddd; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        .available { background-color: #e8f5e8; }
+        button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">設備借用系統</h1>
-        
-        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <div class="mb-4">
-                <input type="text" placeholder="搜尋設備..." class="w-full px-4 py-2 border rounded-lg">
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- 黑金剛 #1 -->
-                <div class="border rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-semibold text-lg">黑金剛 #1</h3>
-                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">可借用</span>
-                    </div>
-                    <button class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 font-medium">借用</button>
-                </div>
-                
-                <!-- 黑金剛 #2 -->
-                <div class="border rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-semibold text-lg">黑金剛 #2</h3>
-                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">可借用</span>
-                    </div>
-                    <button class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 font-medium">借用</button>
-                </div>
-                
-                <!-- 筆記型電腦 #1 -->
-                <div class="border rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-semibold text-lg">筆記型電腦 #1</h3>
-                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">可借用</span>
-                    </div>
-                    <button class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 font-medium">借用</button>
-                </div>
-                
-                <!-- 筆記型電腦 #2 -->
-                <div class="border rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-semibold text-lg">筆記型電腦 #2</h3>
-                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">可借用</span>
-                    </div>
-                    <button class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 font-medium">借用</button>
-                </div>
-                
-                <!-- 桌巾 -->
-                <div class="border rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-semibold text-lg">桌巾</h3>
-                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">可借用</span>
-                    </div>
-                    <div class="text-sm text-gray-600 mb-3">已借用：0</div>
-                    <button class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 font-medium">借用</button>
-                </div>
-                
-                <!-- 其他物品 -->
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    <div class="text-center">
-                        <h3 class="font-semibold text-lg text-gray-600 mb-3">其他物品</h3>
-                        <p class="text-sm text-gray-500 mb-4">系統中沒有的物品可以在這裡登記借用</p>
-                        <button class="w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-600 font-medium">借用其他物品</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="text-center">
-            <button class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 font-medium">借用記錄</button>
-        </div>
-        
-        <div class="mt-6 text-center text-gray-500 text-sm">
-            <p>這是靜態版本的設備借用系統</p>
-            <p>React 互動版本開發中...</p>
-        </div>
+<body>
+    <h1>🏢 設備借用系統</h1>
+    <p>✅ 系統已成功部署！</p>
+    
+    <div class="card available">
+        <h3>黑金剛 #1</h3>
+        <p>狀態：可借用</p>
+        <button onclick="alert('借用功能開發中')">借用</button>
     </div>
+    
+    <div class="card available">
+        <h3>黑金剛 #2</h3>
+        <p>狀態：可借用</p>
+        <button onclick="alert('借用功能開發中')">借用</button>
+    </div>
+    
+    <div class="card available">
+        <h3>筆記型電腦 #1</h3>
+        <p>狀態：可借用</p>
+        <button onclick="alert('借用功能開發中')">借用</button>
+    </div>
+    
+    <div class="card available">
+        <h3>筆記型電腦 #2</h3>
+        <p>狀態：可借用</p>
+        <button onclick="alert('借用功能開發中')">借用</button>
+    </div>
+    
+    <div class="card available">
+        <h3>桌巾</h3>
+        <p>狀態：可借用 | 已借用：0 條</p>
+        <button onclick="alert('借用功能開發中')">借用</button>
+    </div>
+    
+    <hr>
+    <p><strong>部署時間：</strong> <span id="time"></span></p>
+    
+    <script>
+        document.getElementById('time').textContent = new Date().toLocaleString('zh-TW');
+    </script>
 </body>
 </html>
