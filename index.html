@@ -169,7 +169,10 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- 借用清單 -->
                 <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-lg font-semibold mb-4">借用清單</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">借用清單</h3>
+                        <span class="text-sm text-gray-500">僅可計數物品（茶具、餐具、用品）</span>
+                    </div>
                     <div id="cartItems" class="space-y-2 mb-4">
                         <!-- 購物車項目 -->
                     </div>
@@ -593,10 +596,17 @@
                         ${borrowInfo}
                         
                         <div class="flex gap-2">
-                            ${canBorrow(item) ? `
+                            ${canBorrow(item) && item.isCountable ? `
                                 <button onclick="quickAddToCart(${item.id})" 
                                         class="flex-1 bg-purple-500 text-white py-2 rounded text-sm hover:bg-purple-600 font-medium transition-colors">
                                     加入清單
+                                </button>
+                            ` : ''}
+                            
+                            ${canBorrow(item) && !item.isCountable ? `
+                                <button onclick="borrowSingleItem(${item.id})" 
+                                        class="flex-1 bg-blue-500 text-white py-2 rounded text-sm hover:bg-blue-600 font-medium transition-colors">
+                                    借用
                                 </button>
                             ` : ''}
                             
@@ -694,9 +704,16 @@
             renderManagementItems();
         }
 
-        // 快速加入購物車
+        // 快速加入購物車（只允許可計數物品）
         function quickAddToCart(itemId) {
             const item = items.find(i => i.id === itemId);
+            
+            // 檢查是否為可計數物品
+            if (!item.isCountable) {
+                alert('批量借用功能僅適用於可計數物品（如茶具、餐具、用品）。\n單一設備請直接在主頁面進行個別借用。');
+                return;
+            }
+            
             currentQuickAddItem = item;
             showQuickAddModal(item);
         }
@@ -916,40 +933,74 @@
                 return;
             }
 
-            // 新增自訂物品到系統中
-            const newItem = {
-                id: Date.now(),
-                name: formData.itemName,
-                category: '其他',
-                status: 'borrowed',
-                borrower: formData.borrower,
-                borrowDate: formData.borrowDate,
-                department: formData.department,
-                extension: formData.extension,
-                notes: formData.notes,
-                isCountable: false,
-                isCustom: true
-            };
+            // 檢查是否為系統中已存在的單一物品
+            const existingItem = items.find(item => item.name === formData.itemName && !item.isCountable);
+            
+            if (existingItem && !existingItem.isCustom) {
+                // 借用系統中的單一物品
+                const itemIndex = items.findIndex(i => i.id === existingItem.id);
+                items[itemIndex].status = 'borrowed';
+                items[itemIndex].borrower = formData.borrower;
+                items[itemIndex].borrowDate = formData.borrowDate;
+                items[itemIndex].department = formData.department;
+                items[itemIndex].extension = formData.extension;
+                items[itemIndex].notes = formData.notes;
 
-            items.push(newItem);
+                // 新增借用記錄
+                const newRecord = {
+                    id: Date.now() + Math.random(),
+                    itemName: formData.itemName,
+                    borrower: formData.borrower,
+                    department: formData.department,
+                    borrowDate: formData.borrowDate,
+                    quantity: 1,
+                    extension: formData.extension,
+                    notes: formData.notes,
+                    returnDate: null,
+                    status: '借用中',
+                    isCountable: false,
+                    isCustom: false
+                };
 
-            // 新增借用記錄
-            const newRecord = {
-                id: Date.now() + Math.random(),
-                itemName: formData.itemName,
-                borrower: formData.borrower,
-                department: formData.department,
-                borrowDate: formData.borrowDate,
-                quantity: 1,
-                extension: formData.extension,
-                notes: formData.notes,
-                returnDate: null,
-                status: '借用中',
-                isCountable: false,
-                isCustom: true
-            };
+                borrowHistory.push(newRecord);
+                alert(`成功借用系統物品：${formData.itemName}！`);
+            } else {
+                // 新增自訂物品到系統中
+                const newItem = {
+                    id: Date.now(),
+                    name: formData.itemName,
+                    category: '其他',
+                    status: 'borrowed',
+                    borrower: formData.borrower,
+                    borrowDate: formData.borrowDate,
+                    department: formData.department,
+                    extension: formData.extension,
+                    notes: formData.notes,
+                    isCountable: false,
+                    isCustom: true
+                };
 
-            borrowHistory.push(newRecord);
+                items.push(newItem);
+
+                // 新增借用記錄
+                const newRecord = {
+                    id: Date.now() + Math.random(),
+                    itemName: formData.itemName,
+                    borrower: formData.borrower,
+                    department: formData.department,
+                    borrowDate: formData.borrowDate,
+                    quantity: 1,
+                    extension: formData.extension,
+                    notes: formData.notes,
+                    returnDate: null,
+                    status: '借用中',
+                    isCountable: false,
+                    isCustom: true
+                };
+
+                borrowHistory.push(newRecord);
+                alert(`成功借用自訂物品：${formData.itemName}！`);
+            }
 
             saveData();
             renderItems();
@@ -959,8 +1010,6 @@
             // 清空表單
             document.getElementById('customBorrowForm').reset();
             document.getElementById('customBorrowDate').value = new Date().toISOString().split('T')[0];
-            
-            alert(`成功借用自訂物品：${formData.itemName}！`);
         });
 
         // 新增/編輯物資表單提交
@@ -1110,8 +1159,30 @@
             toggleCountFields();
         }
 
+        // 借用單一物品
+        function borrowSingleItem(itemId) {
+            const item = items.find(i => i.id === itemId);
+            
+            // 顯示單一物品借用表單
+            document.getElementById('customItemName').value = item.name;
+            document.getElementById('customBorrowModal').classList.add('show');
+            
+            // 修改標題
+            document.querySelector('#customBorrowModal h3').textContent = `借用 ${item.name}`;
+            
+            // 禁用物品名稱欄位
+            document.getElementById('customItemName').readOnly = true;
+            document.getElementById('customItemName').classList.add('bg-gray-100');
+        }
+
         // 借用其他物品
         function borrowCustomItem() {
+            // 重置表單為自訂物品模式
+            document.getElementById('customItemName').value = '';
+            document.getElementById('customItemName').readOnly = false;
+            document.getElementById('customItemName').classList.remove('bg-gray-100');
+            document.querySelector('#customBorrowModal h3').textContent = '借用其他物品';
+            
             document.getElementById('customBorrowModal').classList.add('show');
         }
 
@@ -1120,6 +1191,10 @@
             document.getElementById('customBorrowModal').classList.remove('show');
             document.getElementById('customBorrowForm').reset();
             document.getElementById('customBorrowDate').value = new Date().toISOString().split('T')[0];
+            
+            // 重置物品名稱欄位狀態
+            document.getElementById('customItemName').readOnly = false;
+            document.getElementById('customItemName').classList.remove('bg-gray-100');
         }
 
         // 取得狀態顯示
