@@ -571,7 +571,14 @@
                 return matchesSearch && matchesCategory && !item.isDeleted;
             });
 
-            grid.innerHTML = filteredItems.map(item => {
+            // 將可計數物品和單一物品分開顯示，但都在主畫面
+            const countableItems = filteredItems.filter(item => item.isCountable);
+            const singleItems = filteredItems.filter(item => !item.isCountable);
+            
+            // 合併顯示，單一設備在前，可計數物品在後
+            const allItems = [...singleItems, ...countableItems];
+
+            grid.innerHTML = allItems.map(item => {
                 const statusDisplay = getStatusDisplay(item);
                 const borrowInfo = getBorrowInfo(item);
                 
@@ -591,7 +598,14 @@
                                 </svg>
                                 <span>庫存：${item.totalCount - item.borrowedCount}/${item.totalCount}</span>
                             </div>
-                        ` : ''}
+                        ` : `
+                            <div class="flex items-center gap-2 mb-3 text-sm text-gray-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                                </svg>
+                                <span>單一設備</span>
+                            </div>
+                        `}
                         
                         ${borrowInfo}
                         
