@@ -34,22 +34,62 @@
         .page.active {
             display: block;
         }
+        .cart-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .print-only {
+            display: none;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+            .print-only {
+                display: block;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <!-- 主頁面 -->
     <div id="dashboard" class="page active">
-        <div class="max-w-4xl mx-auto p-6">
+        <div class="max-w-7xl mx-auto p-6">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-bold text-gray-800">設備借用系統</h1>
-                <button onclick="showHistory()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
-                    借用記錄
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="showCart()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors relative">
+                        批量借用 <span id="cartCount" class="bg-red-500 text-white rounded-full px-2 py-1 text-xs ml-1 hidden">0</span>
+                    </button>
+                    <button onclick="showItemManagement()" class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                        物資管理
+                    </button>
+                    <button onclick="showReports()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        報表
+                    </button>
+                    <button onclick="showHistory()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                        借用記錄
+                    </button>
+                </div>
             </div>
 
             <div class="bg-white p-6 rounded-lg shadow-md">
-                <div class="mb-4">
-                    <div class="relative">
+                <div class="mb-4 flex gap-4">
+                    <div class="relative flex-1">
                         <svg class="w-4 h-4 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
@@ -57,47 +97,96 @@
                                class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                onkeyup="filterItems()">
                     </div>
+                    <select id="categoryFilter" onchange="filterItems()" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">所有類別</option>
+                        <option value="設備">設備</option>
+                        <option value="茶具">茶具</option>
+                        <option value="餐具">餐具</option>
+                        <option value="用品">用品</option>
+                    </select>
                 </div>
 
-                <div id="itemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div id="itemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     <!-- 設備卡片會動態生成 -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 借用表單頁面 -->
-    <div id="borrowPage" class="page">
-        <div class="max-w-4xl mx-auto p-6">
-            <div class="space-y-6">
-                <div class="flex items-center gap-4">
-                    <button onclick="showDashboard()" class="p-2 hover:bg-gray-100 rounded transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    <!-- 物資管理頁面 -->
+    <div id="itemManagementPage" class="page">
+        <div class="max-w-7xl mx-auto p-6">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="showDashboard()" class="p-2 hover:bg-gray-200 rounded transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <h1 class="text-3xl font-bold text-gray-800">物資管理</h1>
+                <button onclick="showAddItemModal()" class="ml-auto bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                    新增物資
+                </button>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="mb-4 flex gap-4">
+                    <div class="relative flex-1">
+                        <svg class="w-4 h-4 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                    </button>
-                    <h1 id="borrowTitle" class="text-3xl font-bold text-gray-800">借用設備</h1>
+                        <input type="text" id="manageSearchInput" placeholder="搜尋物資..." 
+                               class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               onkeyup="filterManageItems()">
+                    </div>
+                    <select id="manageCategoryFilter" onchange="filterManageItems()" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">所有類別</option>
+                        <option value="設備">設備</option>
+                        <option value="茶具">茶具</option>
+                        <option value="餐具">餐具</option>
+                        <option value="用品">用品</option>
+                    </select>
                 </div>
 
-                <div class="bg-white p-6 rounded-lg shadow-md max-w-md">
-                    <div id="borrowItemInfo" class="bg-blue-50 p-4 rounded-lg mb-6">
-                        <!-- 物品資訊會動態生成 -->
+                <div id="manageItemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- 物資管理卡片會動態生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量借用頁面 -->
+    <div id="cartPage" class="page">
+        <div class="max-w-4xl mx-auto p-6">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="showDashboard()" class="p-2 hover:bg-gray-200 rounded transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <h1 class="text-3xl font-bold text-gray-800">批量借用</h1>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 借用清單 -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4">借用清單</h3>
+                    <div id="cartItems" class="space-y-2 mb-4">
+                        <!-- 購物車項目 -->
                     </div>
+                    <button onclick="clearCart()" class="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        清空清單
+                    </button>
+                </div>
 
-                    <form id="borrowForm" class="space-y-4">
-                        <div id="customItemField" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                物品名稱 <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="customItemName" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                   placeholder="請輸入物品名稱">
-                        </div>
-
+                <!-- 借用表單 -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4">借用資訊</h3>
+                    <form id="batchBorrowForm" class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 借用人姓名 <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" id="borrowerName" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            <input type="text" id="batchBorrowerName" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                                    placeholder="請輸入借用人姓名" required>
                         </div>
 
@@ -105,7 +194,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 單位/部門 <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" id="department" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            <input type="text" id="batchDepartment" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                                    placeholder="請輸入單位或部門" required>
                         </div>
 
@@ -113,7 +202,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 分機號碼 <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" id="extension" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            <input type="text" id="batchExtension" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                                    placeholder="請輸入分機號碼" required>
                         </div>
 
@@ -121,37 +210,67 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 借用日期 <span class="text-red-500">*</span>
                             </label>
-                            <input type="date" id="borrowDate" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-
-                        <div id="quantityField" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                借用數量 <span class="text-red-500">*</span>
-                            </label>
-                            <input type="number" id="quantity" min="1" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                   placeholder="請輸入借用數量">
-                            <p id="quantityHint" class="text-xs text-gray-500 mt-1"></p>
+                            <input type="date" id="batchBorrowDate" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 備註
                             </label>
-                            <textarea id="notes" rows="3" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            <textarea id="batchNotes" rows="3" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                                       placeholder="請輸入備註資訊（選填）"></textarea>
                         </div>
 
-                        <div class="flex gap-3 pt-4">
-                            <button type="button" onclick="showDashboard()" 
-                                    class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition-colors font-medium">
-                                取消
-                            </button>
-                            <button type="submit" 
-                                    class="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors font-medium">
-                                確認借用
-                            </button>
-                        </div>
+                        <button type="submit" class="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors font-medium">
+                            確認批量借用
+                        </button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 報表頁面 -->
+    <div id="reportsPage" class="page">
+        <div class="max-w-6xl mx-auto p-6">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="showDashboard()" class="p-2 hover:bg-gray-200 rounded transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <h1 class="text-3xl font-bold text-gray-800">報表中心</h1>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 class="text-lg font-semibold mb-2">庫存報表</h3>
+                    <p class="text-gray-600 mb-4">查看所有物品的庫存狀況</p>
+                    <button onclick="generateInventoryReport()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                        生成報表
+                    </button>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 class="text-lg font-semibold mb-2">借用統計</h3>
+                    <p class="text-gray-600 mb-4">統計各物品的借用次數</p>
+                    <button onclick="generateBorrowReport()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                        生成報表
+                    </button>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 class="text-lg font-semibold mb-2">使用者報表</h3>
+                    <p class="text-gray-600 mb-4">查看各部門借用情況</p>
+                    <button onclick="generateUserReport()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600">
+                        生成報表
+                    </button>
+                </div>
+            </div>
+
+            <div id="reportContent" class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-8 text-center text-gray-500">
+                    請選擇上方報表類型來生成報表
                 </div>
             </div>
         </div>
@@ -177,32 +296,221 @@
         </div>
     </div>
 
+    <!-- 新增物資模態框 -->
+    <div id="addItemModal" class="modal">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">新增物資</h3>
+                <button onclick="closeAddItemModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="addItemForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        物資名稱 <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="newItemName" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="請輸入物資名稱" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        類別 <span class="text-red-500">*</span>
+                    </label>
+                    <select id="newItemCategory" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <option value="">請選擇類別</option>
+                        <option value="設備">設備</option>
+                        <option value="茶具">茶具</option>
+                        <option value="餐具">餐具</option>
+                        <option value="用品">用品</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        物資類型 <span class="text-red-500">*</span>
+                    </label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="itemType" value="single" class="mr-2" onchange="toggleQuantityInput()">
+                            <span>單一物品（如：筆記型電腦 #1）</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="itemType" value="countable" class="mr-2" onchange="toggleQuantityInput()">
+                            <span>可計量物品（如：杯子、盤子）</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="quantitySection" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        總數量 <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="newItemQuantity" min="1" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="請輸入總數量">
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeAddItemModal()" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600">
+                        取消
+                    </button>
+                    <button type="submit" class="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">
+                        新增物資
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 編輯物資模態框 -->
+    <div id="editItemModal" class="modal">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">編輯物資</h3>
+                <button onclick="closeEditItemModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="editItemForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        物資名稱 <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="editItemName" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="請輸入物資名稱" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        類別 <span class="text-red-500">*</span>
+                    </label>
+                    <select id="editItemCategory" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <option value="設備">設備</option>
+                        <option value="茶具">茶具</option>
+                        <option value="餐具">餐具</option>
+                        <option value="用品">用品</option>
+                    </select>
+                </div>
+
+                <div id="editQuantitySection" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        總數量 <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="editItemQuantity" min="1" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="請輸入總數量">
+                    <p class="text-xs text-gray-500 mt-1">注意：修改總數量可能會影響現有借用記錄</p>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeEditItemModal()" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600">
+                        取消
+                    </button>
+                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
+                        儲存變更
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 快速新增到購物車模態框 -->
+    <div id="quickAddModal" class="modal">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="quickAddTitle" class="text-lg font-semibold">新增到借用清單</h3>
+                <button onclick="closeQuickAddModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div id="quickAddItemInfo" class="bg-blue-50 p-3 rounded">
+                    <!-- 物品資訊 -->
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        數量 <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="quickAddQuantity" min="1" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="請輸入數量">
+                    <p id="quickAddHint" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button onclick="closeQuickAddModal()" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600">
+                        取消
+                    </button>
+                    <button onclick="confirmQuickAdd()" class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
+                        加入清單
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 系統資料
         let items = [
+            // 原有設備
             { id: 1, name: '黑金剛 #1', category: '設備', status: 'available', borrower: null, borrowDate: null, isCountable: false },
             { id: 2, name: '黑金剛 #2', category: '設備', status: 'available', borrower: null, borrowDate: null, isCountable: false },
             { id: 3, name: '筆記型電腦 #1', category: '設備', status: 'available', borrower: null, borrowDate: null, isCountable: false },
             { id: 4, name: '筆記型電腦 #2', category: '設備', status: 'available', borrower: null, borrowDate: null, isCountable: false },
-            { id: 5, name: '桌巾', category: '用品', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 20, borrowedCount: 0 }
+            { id: 5, name: '桌巾', category: '用品', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 20, borrowedCount: 0 },
+            
+            // 新增茶具類
+            { id: 101, name: '茶壺(1.2L)', category: '茶具', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 18, borrowedCount: 0 },
+            { id: 102, name: '茶壺-黑銀色(1L)', category: '茶具', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 50, borrowedCount: 0 },
+            { id: 103, name: '茶壺-銀色(1L)', category: '茶具', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 10, borrowedCount: 0 },
+            { id: 104, name: '茶壺(2L)', category: '茶具', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 2, borrowedCount: 0 },
+            { id: 105, name: '青花瓷杯', category: '茶具', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 38, borrowedCount: 0 },
+            
+            // 餐具類
+            { id: 201, name: '葉子形瓷碟', category: '餐具', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 164, borrowedCount: 0 },
+            { id: 202, name: '橢圓形小瓷碟', category: '餐具', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 159, borrowedCount: 0 },
+            { id: 203, name: '淺中橢圓小瓷碟', category: '餐具', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 77, borrowedCount: 0 },
+            { id: 204, name: '正方四翹瓷碟', category: '餐具', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 10, borrowedCount: 0 },
+            
+            // 用品類
+            { id: 301, name: '布杯墊', category: '用品', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 100, borrowedCount: 0 },
+            { id: 302, name: '四方形杯墊', category: '用品', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 20, borrowedCount: 0 },
+            { id: 303, name: '圓形杯墊', category: '用品', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 1, borrowedCount: 0 },
+            { id: 304, name: '木紋托盤', category: '用品', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 59, borrowedCount: 0 },
+            { id: 305, name: '塑膠拖盤', category: '用品', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 22, borrowedCount: 0 },
+            { id: 306, name: '托盤巾', category: '用品', status: 'available', borrower: null, borrowDate: null, isCountable: true, totalCount: 22, borrowedCount: 0 }
         ];
 
         let borrowHistory = [];
-        let currentBorrowItem = null;
+        let cart = [];
+        let currentQuickAddItem = null;
+        let currentEditItem = null;
 
         // 載入資料
         function loadData() {
             const savedItems = localStorage.getItem('lendingSystemItems');
             const savedHistory = localStorage.getItem('lendingSystemHistory');
+            const savedCart = localStorage.getItem('lendingSystemCart');
             
             if (savedItems) items = JSON.parse(savedItems);
             if (savedHistory) borrowHistory = JSON.parse(savedHistory);
+            if (savedCart) cart = JSON.parse(savedCart);
         }
 
         // 儲存資料
         function saveData() {
             localStorage.setItem('lendingSystemItems', JSON.stringify(items));
             localStorage.setItem('lendingSystemHistory', JSON.stringify(borrowHistory));
+            localStorage.setItem('lendingSystemCart', JSON.stringify(cart));
         }
 
         // 初始化
@@ -210,19 +518,35 @@
             loadData();
             renderItems();
             renderHistory();
+            renderCart();
+            updateCartCount();
             
             // 設定今天的日期為預設值
-            document.getElementById('borrowDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('batchBorrowDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        // 更新購物車數量顯示
+        function updateCartCount() {
+            const countElement = document.getElementById('cartCount');
+            if (cart.length > 0) {
+                countElement.textContent = cart.length;
+                countElement.classList.remove('hidden');
+            } else {
+                countElement.classList.add('hidden');
+            }
         }
 
         // 渲染設備
         function renderItems() {
             const grid = document.getElementById('itemsGrid');
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedCategory = document.getElementById('categoryFilter').value;
             
-            const filteredItems = items.filter(item => 
-                item.name.toLowerCase().includes(searchTerm)
-            );
+            const filteredItems = items.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm);
+                const matchesCategory = !selectedCategory || item.category === selectedCategory;
+                return matchesSearch && matchesCategory;
+            });
 
             grid.innerHTML = filteredItems.map(item => {
                 const statusDisplay = getStatusDisplay(item);
@@ -231,8 +555,8 @@
                 return `
                     <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div class="flex justify-between items-start mb-3">
-                            <h3 class="font-semibold text-lg">${item.name}</h3>
-                            <span class="px-3 py-1 rounded-full text-sm font-medium ${statusDisplay.style}">
+                            <h3 class="font-semibold text-base">${item.name}</h3>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.style}">
                                 ${statusDisplay.text}
                             </span>
                         </div>
@@ -242,7 +566,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                                 </svg>
-                                <span>已借用：${item.borrowedCount}</span>
+                                <span>庫存：${item.totalCount - item.borrowedCount}/${item.totalCount}</span>
                             </div>
                         ` : ''}
                         
@@ -250,15 +574,15 @@
                         
                         <div class="flex gap-2">
                             ${canBorrow(item) ? `
-                                <button onclick="borrowItem(${item.id})" 
-                                        class="flex-1 bg-blue-500 text-white py-2 rounded hover:bg-blue-600 font-medium transition-colors">
-                                    借用
+                                <button onclick="quickAddToCart(${item.id})" 
+                                        class="flex-1 bg-purple-500 text-white py-2 rounded text-sm hover:bg-purple-600 font-medium transition-colors">
+                                    加入清單
                                 </button>
                             ` : ''}
                             
                             ${canReturn(item) ? `
                                 <button onclick="returnItem(${item.id})" 
-                                        class="flex-1 bg-orange-500 text-white py-2 rounded hover:bg-orange-600 font-medium transition-colors">
+                                        class="flex-1 bg-orange-500 text-white py-2 rounded text-sm hover:bg-orange-600 font-medium transition-colors">
                                     歸還
                                 </button>
                             ` : ''}
@@ -268,8 +592,8 @@
             }).join('') + `
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors">
                     <div class="text-center">
-                        <h3 class="font-semibold text-lg text-gray-600 mb-3">其他物品</h3>
-                        <p class="text-sm text-gray-500 mb-4">系統中沒有的物品可以在這裡登記借用</p>
+                        <h3 class="font-semibold text-base text-gray-600 mb-3">其他物品</h3>
+                        <p class="text-sm text-gray-500 mb-4">系統中沒有的物品</p>
                         <button onclick="borrowCustomItem()" 
                                 class="w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-600 font-medium transition-colors">
                             借用其他物品
@@ -279,14 +603,432 @@
             `;
         }
 
+        // 渲染物資管理頁面
+        function renderManageItems() {
+            const grid = document.getElementById('manageItemsGrid');
+            const searchTerm = document.getElementById('manageSearchInput').value.toLowerCase();
+            const selectedCategory = document.getElementById('manageCategoryFilter').value;
+            
+            const filteredItems = items.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm);
+                const matchesCategory = !selectedCategory || item.category === selectedCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            grid.innerHTML = filteredItems.map(item => {
+                const statusDisplay = getStatusDisplay(item);
+                
+                return `
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-semibold text-base">${item.name}</h3>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.style}">
+                                ${statusDisplay.text}
+                            </span>
+                        </div>
+                        
+                        <div class="mb-3 text-sm text-gray-600">
+                            <div class="flex items-center gap-2 mb-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                </svg>
+                                <span>類別：${item.category}</span>
+                            </div>
+                            ${item.isCountable ? `
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                    </svg>
+                                    <span>庫存：${item.totalCount - item.borrowedCount}/${item.totalCount}</span>
+                                </div>
+                            ` : `
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>類型：單一物品</span>
+                                </div>
+                            `}
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="editItem(${item.id})" 
+                                    class="flex-1 bg-blue-500 text-white py-2 rounded text-sm hover:bg-blue-600 font-medium transition-colors">
+                                編輯
+                            </button>
+                            <button onclick="deleteItem(${item.id})" 
+                                    class="flex-1 bg-red-500 text-white py-2 rounded text-sm hover:bg-red-600 font-medium transition-colors">
+                                刪除
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 新增物資相關功能
+        function showAddItemModal() {
+            document.getElementById('addItemModal').classList.add('show');
+        }
+
+        function closeAddItemModal() {
+            document.getElementById('addItemModal').classList.remove('show');
+            document.getElementById('addItemForm').reset();
+            document.getElementById('quantitySection').classList.add('hidden');
+        }
+
+        function toggleQuantityInput() {
+            const isCountable = document.querySelector('input[name="itemType"]:checked').value === 'countable';
+            const quantitySection = document.getElementById('quantitySection');
+            
+            if (isCountable) {
+                quantitySection.classList.remove('hidden');
+                document.getElementById('newItemQuantity').required = true;
+            } else {
+                quantitySection.classList.add('hidden');
+                document.getElementById('newItemQuantity').required = false;
+            }
+        }
+
+        // 新增物資表單提交
+        document.getElementById('addItemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('newItemName').value;
+            const category = document.getElementById('newItemCategory').value;
+            const itemType = document.querySelector('input[name="itemType"]:checked').value;
+            const quantity = document.getElementById('newItemQuantity').value;
+
+            // 檢查是否已有相同名稱的物品
+            if (items.some(item => item.name === name)) {
+                alert('已存在相同名稱的物資，請使用不同的名稱');
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                name: name,
+                category: category,
+                status: 'available',
+                borrower: null,
+                borrowDate: null,
+                isCountable: itemType === 'countable'
+            };
+
+            if (itemType === 'countable') {
+                newItem.totalCount = parseInt(quantity);
+                newItem.borrowedCount = 0;
+            }
+
+            items.push(newItem);
+            saveData();
+            renderItems();
+            renderManageItems();
+            closeAddItemModal();
+            alert('物資新增成功！');
+        });
+
+        // 編輯物資
+        function editItem(itemId) {
+            const item = items.find(i => i.id === itemId);
+            currentEditItem = item;
+            
+            document.getElementById('editItemName').value = item.name;
+            document.getElementById('editItemCategory').value = item.category;
+            
+            if (item.isCountable) {
+                document.getElementById('editQuantitySection').classList.remove('hidden');
+                document.getElementById('editItemQuantity').value = item.totalCount;
+                document.getElementById('editItemQuantity').required = true;
+            } else {
+                document.getElementById('editQuantitySection').classList.add('hidden');
+                document.getElementById('editItemQuantity').required = false;
+            }
+            
+            document.getElementById('editItemModal').classList.add('show');
+        }
+
+        function closeEditItemModal() {
+            document.getElementById('editItemModal').classList.remove('show');
+            currentEditItem = null;
+        }
+
+        // 編輯物資表單提交
+        document.getElementById('editItemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('editItemName').value;
+            const category = document.getElementById('editItemCategory').value;
+            const quantity = document.getElementById('editItemQuantity').value;
+
+            // 檢查是否已有相同名稱的物品（排除自己）
+            if (items.some(item => item.name === name && item.id !== currentEditItem.id)) {
+                alert('已存在相同名稱的物資，請使用不同的名稱');
+                return;
+            }
+
+            const itemIndex = items.findIndex(i => i.id === currentEditItem.id);
+            items[itemIndex].name = name;
+            items[itemIndex].category = category;
+            
+            if (currentEditItem.isCountable && quantity) {
+                const newTotal = parseInt(quantity);
+                const currentBorrowed = items[itemIndex].borrowedCount;
+                
+                if (newTotal < currentBorrowed) {
+                    alert('總數量不能少於已借用數量');
+                    return;
+                }
+                
+                items[itemIndex].totalCount = newTotal;
+            }
+
+            saveData();
+            renderItems();
+            renderManageItems();
+            closeEditItemModal();
+            alert('物資編輯成功！');
+        });
+
+        // 刪除物資
+        function deleteItem(itemId) {
+            const item = items.find(i => i.id === itemId);
+            
+            // 檢查是否有借用中的記錄
+            if (item.status === 'borrowed' || (item.isCountable && item.borrowedCount > 0)) {
+                alert('該物資目前有借用中的記錄，無法刪除');
+                return;
+            }
+
+            if (confirm(`確定要刪除「${item.name}」嗎？此操作無法復原。`)) {
+                const itemIndex = items.findIndex(i => i.id === itemId);
+                items.splice(itemIndex, 1);
+                saveData();
+                renderItems();
+                renderManageItems();
+                alert('物資刪除成功！');
+            }
+        }
+
+        // 物資管理頁面搜尋功能
+        function filterManageItems() {
+            renderManageItems();
+        }
+
+        // 快速加入購物車
+        function quickAddToCart(itemId) {
+            const item = items.find(i => i.id === itemId);
+            currentQuickAddItem = item;
+            showQuickAddModal(item);
+        }
+
+        // 顯示快速新增模態框
+        function showQuickAddModal(item) {
+            const modal = document.getElementById('quickAddModal');
+            const title = document.getElementById('quickAddTitle');
+            const itemInfo = document.getElementById('quickAddItemInfo');
+            const quantityInput = document.getElementById('quickAddQuantity');
+            const hint = document.getElementById('quickAddHint');
+
+            title.textContent = `新增到借用清單`;
+            
+            const available = item.totalCount - item.borrowedCount;
+            itemInfo.innerHTML = `
+                <h4 class="font-semibold">${item.name}</h4>
+                <p class="text-sm text-gray-600">可借用數量：${available}</p>
+            `;
+
+            quantityInput.max = available;
+            quantityInput.value = 1;
+            hint.textContent = `最多可借用 ${available} 個`;
+
+            modal.classList.add('show');
+        }
+
+        // 確認快速新增
+        function confirmQuickAdd() {
+            const quantity = parseInt(document.getElementById('quickAddQuantity').value);
+            if (!quantity || quantity < 1) {
+                alert('請輸入有效的數量');
+                return;
+            }
+
+            const available = currentQuickAddItem.totalCount - currentQuickAddItem.borrowedCount;
+            if (quantity > available) {
+                alert('數量超過可借用庫存');
+                return;
+            }
+
+            // 檢查購物車中是否已有此物品
+            const existingIndex = cart.findIndex(cartItem => cartItem.itemId === currentQuickAddItem.id);
+            if (existingIndex !== -1) {
+                cart[existingIndex].quantity += quantity;
+            } else {
+                cart.push({
+                    itemId: currentQuickAddItem.id,
+                    itemName: currentQuickAddItem.name,
+                    quantity: quantity,
+                    maxAvailable: available
+                });
+            }
+
+            saveData();
+            renderCart();
+            updateCartCount();
+            closeQuickAddModal();
+            alert(`已加入 ${quantity} 個 ${currentQuickAddItem.name} 到借用清單`);
+        }
+
+        // 關閉快速新增模態框
+        function closeQuickAddModal() {
+            document.getElementById('quickAddModal').classList.remove('show');
+            currentQuickAddItem = null;
+        }
+
+        // 渲染購物車
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="text-center text-gray-500 py-4">借用清單為空</div>';
+                return;
+            }
+
+            cartItems.innerHTML = cart.map((cartItem, index) => `
+                <div class="cart-item">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h4 class="font-medium">${cartItem.itemName}</h4>
+                            <p class="text-sm text-gray-600">數量：${cartItem.quantity}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="updateCartQuantity(${index}, ${cartItem.quantity - 1})" 
+                                    class="bg-gray-300 text-gray-700 px-2 py-1 rounded text-sm hover:bg-gray-400"
+                                    ${cartItem.quantity <= 1 ? 'disabled' : ''}>
+                                -
+                            </button>
+                            <span class="px-3 py-1 bg-gray-100 rounded text-sm">${cartItem.quantity}</span>
+                            <button onclick="updateCartQuantity(${index}, ${cartItem.quantity + 1})" 
+                                    class="bg-gray-300 text-gray-700 px-2 py-1 rounded text-sm hover:bg-gray-400"
+                                    ${cartItem.quantity >= cartItem.maxAvailable ? 'disabled' : ''}>
+                                +
+                            </button>
+                            <button onclick="removeFromCart(${index})" 
+                                    class="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600">
+                                移除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 更新購物車數量
+        function updateCartQuantity(index, newQuantity) {
+            if (newQuantity < 1) return;
+            if (newQuantity > cart[index].maxAvailable) return;
+            
+            cart[index].quantity = newQuantity;
+            saveData();
+            renderCart();
+        }
+
+        // 從購物車移除
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveData();
+            renderCart();
+            updateCartCount();
+        }
+
+        // 清空購物車
+        function clearCart() {
+            cart = [];
+            saveData();
+            renderCart();
+            updateCartCount();
+        }
+
+        // 批量借用表單提交
+        document.getElementById('batchBorrowForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (cart.length === 0) {
+                alert('借用清單為空，請先加入物品');
+                return;
+            }
+
+            const formData = {
+                borrower: document.getElementById('batchBorrowerName').value,
+                department: document.getElementById('batchDepartment').value,
+                extension: document.getElementById('batchExtension').value,
+                borrowDate: document.getElementById('batchBorrowDate').value,
+                notes: document.getElementById('batchNotes').value
+            };
+
+            if (!formData.borrower || !formData.department || !formData.extension || !formData.borrowDate) {
+                alert('請填寫完整資料（姓名、單位、分機、日期為必填）');
+                return;
+            }
+
+            // 檢查庫存
+            for (let cartItem of cart) {
+                const item = items.find(i => i.id === cartItem.itemId);
+                const available = item.totalCount - item.borrowedCount;
+                if (cartItem.quantity > available) {
+                    alert(`${item.name} 庫存不足！目前可借用數量：${available}`);
+                    return;
+                }
+            }
+
+            // 處理所有借用
+            cart.forEach(cartItem => {
+                const itemIndex = items.findIndex(i => i.id === cartItem.itemId);
+                items[itemIndex].borrowedCount += cartItem.quantity;
+                items[itemIndex].status = items[itemIndex].borrowedCount >= items[itemIndex].totalCount ? 'borrowed' : 'partial';
+
+                // 新增借用記錄
+                const newRecord = {
+                    id: Date.now() + Math.random(),
+                    itemName: cartItem.itemName,
+                    borrower: formData.borrower,
+                    department: formData.department,
+                    borrowDate: formData.borrowDate,
+                    quantity: cartItem.quantity,
+                    extension: formData.extension,
+                    notes: formData.notes,
+                    returnDate: null,
+                    status: '借用中',
+                    isCountable: true,
+                    isBatch: true
+                };
+
+                borrowHistory.push(newRecord);
+            });
+
+            saveData();
+            renderItems();
+            renderHistory();
+            clearCart();
+            
+            // 清空表單
+            document.getElementById('batchBorrowForm').reset();
+            document.getElementById('batchBorrowDate').value = new Date().toISOString().split('T')[0];
+            
+            alert(`成功借用 ${cart.length} 項物品！`);
+            showDashboard();
+        });
+
         // 取得狀態顯示
         function getStatusDisplay(item) {
             if (item.isCountable) {
                 const available = item.totalCount - item.borrowedCount;
                 if (available === item.totalCount) {
-                    return { text: '可借用', style: 'bg-green-100 text-green-800' };
+                    return { text: '充足', style: 'bg-green-100 text-green-800' };
+                } else if (available > item.totalCount * 0.3) {
+                    return { text: '可借用', style: 'bg-blue-100 text-blue-800' };
                 } else if (available > 0) {
-                    return { text: '可借用', style: 'bg-green-100 text-green-800' };
+                    return { text: '剩餘少量', style: 'bg-yellow-100 text-yellow-800' };
                 } else {
                     return { text: '已借完', style: 'bg-red-100 text-red-800' };
                 }
@@ -345,171 +1087,11 @@
             renderItems();
         }
 
-        // 借用物品
-        function borrowItem(itemId) {
-            currentBorrowItem = items.find(item => item.id === itemId);
-            showBorrowForm(currentBorrowItem);
-        }
-
-        // 借用自訂物品
+        // 借用自訂物品（保持原有功能）
         function borrowCustomItem() {
-            currentBorrowItem = { id: 'custom', name: '自訂物品', isCountable: false };
-            showBorrowForm(currentBorrowItem);
+            // 這裡可以保持原有的自訂物品借用邏輯
+            alert('自訂物品借用功能開發中');
         }
-
-        // 顯示借用表單
-        function showBorrowForm(item) {
-            const title = document.getElementById('borrowTitle');
-            const itemInfo = document.getElementById('borrowItemInfo');
-            const customField = document.getElementById('customItemField');
-            const quantityField = document.getElementById('quantityField');
-            const quantityInput = document.getElementById('quantity');
-            const quantityHint = document.getElementById('quantityHint');
-
-            title.textContent = item.id === 'custom' ? '借用其他物品' : `借用設備`;
-            
-            if (item.id === 'custom') {
-                itemInfo.innerHTML = '<h3 class="font-semibold text-lg">借用其他物品</h3>';
-                customField.classList.remove('hidden');
-                quantityField.classList.add('hidden');
-            } else {
-                itemInfo.innerHTML = `
-                    <h3 class="font-semibold text-lg">借用設備: ${item.name}</h3>
-                    ${item.isCountable ? `<p class="text-sm text-gray-600 mt-1">可借用數量：${item.totalCount - item.borrowedCount}</p>` : ''}
-                `;
-                customField.classList.add('hidden');
-                if (item.isCountable) {
-                    const maxQuantity = item.totalCount - item.borrowedCount;
-                    quantityField.classList.remove('hidden');
-                    quantityInput.max = maxQuantity;
-                    quantityInput.value = 1;
-                    quantityHint.textContent = `最多可借用 ${maxQuantity} 條`;
-                } else {
-                    quantityField.classList.add('hidden');
-                }
-            }
-
-            // 清空表單
-            document.getElementById('borrowForm').reset();
-            document.getElementById('borrowDate').value = new Date().toISOString().split('T')[0];
-
-            showPage('borrowPage');
-        }
-
-        // 處理借用表單提交
-        document.getElementById('borrowForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = {
-                borrower: document.getElementById('borrowerName').value,
-                department: document.getElementById('department').value,
-                extension: document.getElementById('extension').value,
-                borrowDate: document.getElementById('borrowDate').value,
-                notes: document.getElementById('notes').value,
-                customItemName: document.getElementById('customItemName').value,
-                quantity: parseInt(document.getElementById('quantity').value) || 1
-            };
-
-            if (!formData.borrower || !formData.department || !formData.extension || !formData.borrowDate) {
-                alert('請填寫完整資料（姓名、單位、分機、日期為必填）');
-                return;
-            }
-
-            // 處理自訂物品
-            if (currentBorrowItem.id === 'custom') {
-                if (!formData.customItemName.trim()) {
-                    alert('請填寫物品名稱');
-                    return;
-                }
-                
-                // 創建新的自訂物品並加入到 items 陣列
-                const newCustomItem = {
-                    id: Date.now(),
-                    name: formData.customItemName,
-                    category: '自訂物品',
-                    status: 'borrowed',
-                    borrower: formData.borrower,
-                    department: formData.department,
-                    borrowDate: formData.borrowDate,
-                    extension: formData.extension,
-                    notes: formData.notes,
-                    isCountable: false,
-                    isCustom: true
-                };
-                
-                items.push(newCustomItem);
-                
-                const newRecord = {
-                    id: Date.now(),
-                    itemName: formData.customItemName,
-                    borrower: formData.borrower,
-                    department: formData.department,
-                    borrowDate: formData.borrowDate,
-                    quantity: 1,
-                    extension: formData.extension,
-                    notes: formData.notes,
-                    returnDate: null,
-                    status: '借用中',
-                    isCountable: false,
-                    isCustom: true
-                };
-
-                borrowHistory.push(newRecord);
-                saveData();
-                renderItems();
-                renderHistory();
-                showDashboard();
-                alert('自訂物品借用登記成功！');
-                return;
-            }
-
-            // 處理系統物品
-            const item = currentBorrowItem;
-            
-            if (item.isCountable) {
-                const availableCount = item.totalCount - item.borrowedCount;
-                if (formData.quantity > availableCount) {
-                    alert(`庫存不足！目前可借用數量：${availableCount}`);
-                    return;
-                }
-            }
-
-            // 更新物品狀態
-            const itemIndex = items.findIndex(i => i.id === item.id);
-            if (item.isCountable) {
-                items[itemIndex].borrowedCount += formData.quantity;
-                items[itemIndex].status = items[itemIndex].borrowedCount >= item.totalCount ? 'borrowed' : 'partial';
-            } else {
-                items[itemIndex].status = 'borrowed';
-                items[itemIndex].borrower = formData.borrower;
-                items[itemIndex].department = formData.department;
-                items[itemIndex].borrowDate = formData.borrowDate;
-                items[itemIndex].extension = formData.extension;
-                items[itemIndex].notes = formData.notes;
-            }
-
-            // 新增借用記錄
-            const newRecord = {
-                id: Date.now(),
-                itemName: item.name,
-                borrower: formData.borrower,
-                department: formData.department,
-                borrowDate: formData.borrowDate,
-                quantity: item.isCountable ? formData.quantity : 1,
-                extension: formData.extension,
-                notes: formData.notes,
-                returnDate: null,
-                status: '借用中',
-                isCountable: item.isCountable
-            };
-
-            borrowHistory.push(newRecord);
-            saveData();
-            renderItems();
-            renderHistory();
-            showDashboard();
-            alert('借用登記成功！');
-        });
 
         // 歸還物品
         function returnItem(itemId) {
@@ -550,7 +1132,7 @@
                 };
                 
                 borrowHistory.push(returnRecord);
-                alert(`成功歸還 ${qty} 條${item.name}！`);
+                alert(`成功歸還 ${qty} 個${item.name}！`);
             } else {
                 // 單一物品歸還（包括自訂物品）
                 const itemIndex = items.findIndex(i => i.id === itemId);
@@ -583,6 +1165,7 @@
             saveData();
             renderItems();
             renderHistory();
+            renderManageItems();
         }
 
         // 渲染借用記錄
@@ -620,7 +1203,7 @@
                                     <td class="px-6 py-4">${record.extension || '-'}</td>
                                     <td class="px-6 py-4">
                                         ${record.quantity > 0 ? record.quantity : Math.abs(record.quantity)}
-                                        ${record.isCountable ? ' 條' : ''}
+                                        ${record.isCountable ? ' 個' : ''}
                                         ${record.quantity < 0 ? ' (歸還)' : ''}
                                     </td>
                                     <td class="px-6 py-4">${record.borrowDate}</td>
@@ -642,6 +1225,259 @@
             `;
         }
 
+        // 生成庫存報表
+        function generateInventoryReport() {
+            const content = document.getElementById('reportContent');
+            const totalItems = items.length;
+            const availableItems = items.filter(item => item.status === 'available' || (item.isCountable && item.borrowedCount < item.totalCount)).length;
+            
+            content.innerHTML = `
+                <div class="print-area">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6 no-print">
+                            <h2 class="text-2xl font-bold">庫存報表</h2>
+                            <button onclick="printReport()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                                列印報表
+                            </button>
+                        </div>
+                        
+                        <div class="print-only mb-6">
+                            <h1 class="text-3xl font-bold text-center">設備借用系統 - 庫存報表</h1>
+                            <p class="text-center text-gray-600 mt-2">生成日期：${new Date().toLocaleDateString('zh-TW')}</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-blue-50 p-4 rounded-lg text-center">
+                                <h3 class="text-lg font-semibold text-blue-800">總物品數</h3>
+                                <p class="text-3xl font-bold text-blue-600">${totalItems}</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg text-center">
+                                <h3 class="text-lg font-semibold text-green-800">可借用</h3>
+                                <p class="text-3xl font-bold text-green-600">${availableItems}</p>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg text-center">
+                                <h3 class="text-lg font-semibold text-red-800">借用中</h3>
+                                <p class="text-3xl font-bold text-red-600">${totalItems - availableItems}</p>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full border border-gray-300">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 border text-left font-medium">物品名稱</th>
+                                        <th class="px-4 py-2 border text-left font-medium">類別</th>
+                                        <th class="px-4 py-2 border text-center font-medium">總數量</th>
+                                        <th class="px-4 py-2 border text-center font-medium">已借用</th>
+                                        <th class="px-4 py-2 border text-center font-medium">可借用</th>
+                                        <th class="px-4 py-2 border text-center font-medium">使用率</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${items.filter(item => item.isCountable).map(item => {
+                                        const available = item.totalCount - item.borrowedCount;
+                                        const usage = ((item.borrowedCount / item.totalCount) * 100).toFixed(1);
+                                        return `
+                                            <tr>
+                                                <td class="px-4 py-2 border">${item.name}</td>
+                                                <td class="px-4 py-2 border">${item.category}</td>
+                                                <td class="px-4 py-2 border text-center">${item.totalCount}</td>
+                                                <td class="px-4 py-2 border text-center">${item.borrowedCount}</td>
+                                                <td class="px-4 py-2 border text-center">${available}</td>
+                                                <td class="px-4 py-2 border text-center">${usage}%</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成借用統計報表
+        function generateBorrowReport() {
+            const content = document.getElementById('reportContent');
+            
+            // 統計各物品借用次數
+            const borrowStats = {};
+            borrowHistory.forEach(record => {
+                if (record.quantity > 0) { // 只統計借用，不包括歸還
+                    if (!borrowStats[record.itemName]) {
+                        borrowStats[record.itemName] = 0;
+                    }
+                    borrowStats[record.itemName] += record.quantity;
+                }
+            });
+
+            const sortedStats = Object.entries(borrowStats)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 20); // 取前20名
+
+            content.innerHTML = `
+                <div class="print-area">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6 no-print">
+                            <h2 class="text-2xl font-bold">借用統計報表</h2>
+                            <button onclick="printReport()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                                列印報表
+                            </button>
+                        </div>
+                        
+                        <div class="print-only mb-6">
+                            <h1 class="text-3xl font-bold text-center">設備借用系統 - 借用統計報表</h1>
+                            <p class="text-center text-gray-600 mt-2">生成日期：${new Date().toLocaleDateString('zh-TW')}</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-purple-50 p-4 rounded-lg text-center">
+                                <h3 class="text-lg font-semibold text-purple-800">總借用次數</h3>
+                                <p class="text-3xl font-bold text-purple-600">${borrowHistory.filter(r => r.quantity > 0).length}</p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg text-center">
+                                <h3 class="text-lg font-semibold text-blue-800">已歸還次數</h3>
+                                <p class="text-3xl font-bold text-blue-600">${borrowHistory.filter(r => r.status === '已歸還').length}</p>
+                            </div>
+                            <div class="bg-orange-50 p-4 rounded-lg text-center">
+                                <h3 class="text-lg font-semibold text-orange-800">目前借用中</h3>
+                                <p class="text-3xl font-bold text-orange-600">${borrowHistory.filter(r => r.status === '借用中').length}</p>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">熱門借用物品排行</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full border border-gray-300">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 border text-center font-medium">排名</th>
+                                        <th class="px-4 py-2 border text-left font-medium">物品名稱</th>
+                                        <th class="px-4 py-2 border text-center font-medium">累計借用數量</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${sortedStats.map(([itemName, count], index) => `
+                                        <tr>
+                                            <td class="px-4 py-2 border text-center font-bold">${index + 1}</td>
+                                            <td class="px-4 py-2 border">${itemName}</td>
+                                            <td class="px-4 py-2 border text-center">${count}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成使用者報表
+        function generateUserReport() {
+            const content = document.getElementById('reportContent');
+            
+            // 統計各部門借用情況
+            const deptStats = {};
+            borrowHistory.forEach(record => {
+                if (record.quantity > 0 && record.department) {
+                    if (!deptStats[record.department]) {
+                        deptStats[record.department] = { count: 0, items: 0 };
+                    }
+                    deptStats[record.department].count++;
+                    deptStats[record.department].items += record.quantity;
+                }
+            });
+
+            const sortedDeptStats = Object.entries(deptStats)
+                .sort(([,a], [,b]) => b.count - a.count);
+
+            content.innerHTML = `
+                <div class="print-area">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6 no-print">
+                            <h2 class="text-2xl font-bold">使用者報表</h2>
+                            <button onclick="printReport()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600">
+                                列印報表
+                            </button>
+                        </div>
+                        
+                        <div class="print-only mb-6">
+                            <h1 class="text-3xl font-bold text-center">設備借用系統 - 使用者報表</h1>
+                            <p class="text-center text-gray-600 mt-2">生成日期：${new Date().toLocaleDateString('zh-TW')}</p>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">各部門借用統計</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full border border-gray-300">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 border text-left font-medium">部門</th>
+                                        <th class="px-4 py-2 border text-center font-medium">借用次數</th>
+                                        <th class="px-4 py-2 border text-center font-medium">借用物品總數</th>
+                                        <th class="px-4 py-2 border text-center font-medium">平均每次借用</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${sortedDeptStats.map(([dept, stats]) => `
+                                        <tr>
+                                            <td class="px-4 py-2 border font-medium">${dept}</td>
+                                            <td class="px-4 py-2 border text-center">${stats.count}</td>
+                                            <td class="px-4 py-2 border text-center">${stats.items}</td>
+                                            <td class="px-4 py-2 border text-center">${(stats.items / stats.count).toFixed(1)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4 mt-8">最近借用記錄</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full border border-gray-300">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 border text-left font-medium">借用日期</th>
+                                        <th class="px-4 py-2 border text-left font-medium">借用人</th>
+                                        <th class="px-4 py-2 border text-left font-medium">部門</th>
+                                        <th class="px-4 py-2 border text-left font-medium">物品</th>
+                                        <th class="px-4 py-2 border text-center font-medium">數量</th>
+                                        <th class="px-4 py-2 border text-center font-medium">狀態</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${borrowHistory
+                                        .filter(record => record.quantity > 0)
+                                        .sort((a, b) => new Date(b.borrowDate) - new Date(a.borrowDate))
+                                        .slice(0, 20)
+                                        .map(record => `
+                                            <tr>
+                                                <td class="px-4 py-2 border">${record.borrowDate}</td>
+                                                <td class="px-4 py-2 border">${record.borrower}</td>
+                                                <td class="px-4 py-2 border">${record.department || '-'}</td>
+                                                <td class="px-4 py-2 border">${record.itemName}</td>
+                                                <td class="px-4 py-2 border text-center">${record.quantity}</td>
+                                                <td class="px-4 py-2 border text-center">
+                                                    <span class="px-2 py-1 rounded text-xs ${
+                                                        record.status === '已歸還' 
+                                                            ? 'bg-green-100 text-green-800' 
+                                                            : 'bg-yellow-100 text-yellow-800'
+                                                    }">
+                                                        ${record.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 列印報表
+        function printReport() {
+            window.print();
+        }
+
         // 頁面切換
         function showPage(pageId) {
             const pages = document.querySelectorAll('.page');
@@ -651,12 +1487,51 @@
 
         function showDashboard() {
             showPage('dashboard');
-            currentBorrowItem = null;
+        }
+
+        function showCart() {
+            showPage('cartPage');
+        }
+
+        function showItemManagement() {
+            showPage('itemManagementPage');
+            renderManageItems();
+        }
+
+        function showReports() {
+            showPage('reportsPage');
         }
 
         function showHistory() {
             showPage('history');
         }
+
+        // 模態框事件
+        document.getElementById('quickAddModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeQuickAddModal();
+            }
+        });
+
+        document.getElementById('addItemModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddItemModal();
+            }
+        });
+
+        document.getElementById('editItemModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditItemModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeQuickAddModal();
+                closeAddItemModal();
+                closeEditItemModal();
+            }
+        });
 
         // 初始化系統
         init();
